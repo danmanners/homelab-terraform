@@ -1,0 +1,8 @@
+# Terraform Directories
+.terraform/
+generated/
+
+# Terraform Files
+*.lock.hcl
+*.state
+state.json

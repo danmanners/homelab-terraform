@@ -1,0 +1,7 @@
+---
+server: https://homelab-k3s.danmanners.io:6443
+token: KFakeToken::server:cFakeSecret
+# Update the Flannel interface name to the appropriate ZeroTier Interface name
+flannel-iface: ztyou2j6dw
+# Set the Node-External-IP to the public IP of the host
+node-external-ip: ${PUBLIC_IP_ADDRESS_GOES_HERE}

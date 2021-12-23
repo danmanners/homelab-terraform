@@ -1,0 +1,32 @@
+[Unit]
+Description=Lightweight Kubernetes
+Documentation=https://k3s.io
+# We do not want to start k3s until ZeroTier is started and running
+After=network-online.target ZeroTier-one.service
+
+[Service]
+Type=notify
+ExecStartPre=-/sbin/modprobe br_netfilter
+ExecStartPre=-/sbin/modprobe overlay
+
+# This ensures that the Ubuntu DNS service uses the zerotier interface
+# to route to the homelab DNS for relevant traffic.
+ExecStartPre=/usr/bin/systemd-resolve -i ztyou2j6dw --set-dns=10.45.0.1
+
+ExecStart=/usr/local/bin/k3s agent
+KillMode=process
+Delegate=yes
+# Having non-zero Limit*s causes performance problems due to accounting overhead
+# in the kernel. We recommend using cgroups to do container-local accounting.
+LimitNOFILE=1048576
+LimitNPROC=infinity
+LimitCORE=infinity
+TasksMax=infinity
+TimeoutStartSec=0
+Restart=always
+RestartSec=5s
+
+[Install]
+# We do not want to start k3s until ZeroTier is started and running
+Requires=ZeroTier-one.service
+WantedBy=multi-user.target
