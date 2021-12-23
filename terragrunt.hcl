@@ -6,7 +6,8 @@ terraform {
             "plan",
             "import",
             "push",
-            "refresh"
+            "refresh",
+            "console"
         ]
 
         arguments = [

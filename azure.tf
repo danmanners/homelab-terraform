@@ -1,10 +1,10 @@
 ## Resource Group
 resource "azurerm_resource_group" "homelab_learning" {
   location = var.azure.location
-  name     = "homelab-learning"
+  name     = var.azure.resource_group_name
 
   tags = {
-    Name    = "homelab-learning"
+    Name    = var.azure.resource_group_name
     project = "Homelab"
     purpose = "Learning"
   }
@@ -14,7 +14,7 @@ resource "azurerm_resource_group" "homelab_learning" {
 resource "azurerm_network_security_group" "k3s_ingress_security_group" {
   resource_group_name = azurerm_resource_group.homelab_learning.name
   location            = var.azure.location
-  name                = "homelab-learning-k3s_ingress"
+  name                = "${var.azure.resource_group_name}-k3s_ingress"
 
   # Allow ICMP Inbound
   security_rule {
@@ -91,18 +91,20 @@ resource "azurerm_network_security_group" "k3s_ingress_security_group" {
 resource "azurerm_virtual_network" "cloud_homelab" {
   resource_group_name = azurerm_resource_group.homelab_learning.name
   location            = var.azure.location
-  address_space       = ["10.91.0.0/16"]
-  name                = "Cloud-Homelab"
+  address_space = [
+    var.azure.address_space
+  ]
+  name = "Cloud-Homelab"
 
   subnet {
-    name           = "public1"
-    address_prefix = "10.91.0.0/24"
+    name           = keys(var.azure.subnets)[0]
+    address_prefix = values(var.azure.subnets)[0]
     security_group = azurerm_network_security_group.k3s_ingress_security_group.id
   }
 
   tags = {
     project      = "Homelab"
-    project-name = "homelab-learning"
+    project-name = var.azure.resource_group_name
     purpose      = "Learning"
   }
 
@@ -115,7 +117,7 @@ resource "azurerm_virtual_network" "cloud_homelab" {
 resource "azurerm_public_ip" "k3s_vm" {
   resource_group_name     = azurerm_resource_group.homelab_learning.name
   location                = var.azure.location
-  name                    = "tpi-k3s-azure-edge-public-ip"
+  name                    = "${var.azure.compute.*.name[0]}-public-ip"
   allocation_method       = "Static"
   availability_zone       = "Zone-Redundant"
   idle_timeout_in_minutes = "4"
@@ -124,7 +126,7 @@ resource "azurerm_public_ip" "k3s_vm" {
   sku_tier                = "Regional"
 
   tags = {
-    Name    = "homelab-learning-public-ip"
+    Name    = "${var.azure.resource_group_name}-public-ip"
     project = "Homelab"
     purpose = "Learning"
   }
@@ -134,7 +136,7 @@ resource "azurerm_public_ip" "k3s_vm" {
 resource "azurerm_network_interface" "k3s_vm_nic" {
   resource_group_name = azurerm_resource_group.homelab_learning.name
   location            = var.azure.location
-  name                = "Cloud-Homelab-tpi-k3s-azure-edge-nic"
+  name                = "Cloud-Homelab-${var.azure.compute.*.name[0]}-nic"
 
   enable_accelerated_networking = "false"
   enable_ip_forwarding          = "true"
@@ -149,7 +151,7 @@ resource "azurerm_network_interface" "k3s_vm_nic" {
   }
 
   tags = {
-    Name    = "homelab-learning-k3s-host-eni"
+    Name    = "${var.azure.resource_group_name}-k3s-host-eni"
     project = "Homelab"
     purpose = "Learning"
   }
@@ -157,24 +159,22 @@ resource "azurerm_network_interface" "k3s_vm_nic" {
 
 ## K3s VM VM Disk
 resource "azurerm_managed_disk" "tpi-k3s-azure-edge_disk1_70a4f4157fd847dc91d8c5a76b3840fe" {
-  resource_group_name           = upper(azurerm_resource_group.homelab_learning.name)
-  location                      = var.azure.location
-  name                          = "tpi-k3s-azure-edge_disk1_70a4f4157fd847dc91d8c5a76b3840fe"
+  resource_group_name = upper(azurerm_resource_group.homelab_learning.name)
+  location            = var.azure.location
+  name                = "${var.azure.compute.*.name[0]}_disk1_70a4f4157fd847dc91d8c5a76b3840fe"
   # Create the disk from the Ubuntu Focal Image
-  create_option                 = "FromImage"
-  image_reference_id            = "/Subscriptions/723f5558-8ae1-4d65-aedb-e4a48a9b7ea2/Providers/Microsoft.Compute/Locations/eastus/Publishers/canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-focal/Skus/20_04-lts-gen2/Versions/20.04.202107200"
+  create_option      = "FromImage"
+  image_reference_id = "/Subscriptions/723f5558-8ae1-4d65-aedb-e4a48a9b7ea2/Providers/Microsoft.Compute/Locations/eastus/Publishers/canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-focal/Skus/20_04-lts-gen2/Versions/20.04.202107200"
   # Disk Size
-  disk_size_gb                  = "32"
+  disk_size_gb = "32"
   # R/W IOPS
   disk_iops_read_write          = "500"
   disk_mbps_read_write          = "60"
   hyper_v_generation            = "V2"
-  # max_shares                    = "0"
   os_type                       = "Linux"
   public_network_access_enabled = "true"
   on_demand_bursting_enabled    = "false"
   storage_account_type          = "Standard_LRS"
-  # trusted_launch_enabled        = "false"
 }
 
 ## Ubuntu Virtual Machine
@@ -186,33 +186,29 @@ resource "azurerm_linux_virtual_machine" "tpi_k3s_azure_edge" {
 
   admin_username                  = "danmanners"
   allow_extension_operations      = "true"
-  computer_name                   = "tpi-k3s-azure-edge"
+  computer_name                   = var.azure.compute.*.name[0]
   disable_password_authentication = "true"
   encryption_at_host_enabled      = "false"
-  # extensions_time_budget          = "PT1H30M"
   location                        = var.azure.location
   max_bid_price                   = "-1"
-  name                            = "tpi-k3s-azure-edge"
-  network_interface_ids           = [
+  name                            = var.azure.compute.*.name[0]
+  network_interface_ids = [
     azurerm_network_interface.k3s_vm_nic.id
   ]
 
   os_disk {
     caching                   = "ReadWrite"
-    disk_size_gb              = "32"
     name                      = azurerm_managed_disk.tpi-k3s-azure-edge_disk1_70a4f4157fd847dc91d8c5a76b3840fe.name
-    # name                      = "tpi-k3s-azure-edge_disk1_70a4f4157fd847dc91d8c5a76b3840fe"
     storage_account_type      = "Standard_LRS"
     write_accelerator_enabled = "false"
   }
 
-  patch_mode            = "ImageDefault"
-  # platform_fault_domain = "-1"
-  priority              = "Regular"
-  provision_vm_agent    = "true"
-  resource_group_name   = "HOMELAB-LEARNING"
-  secure_boot_enabled   = "false"
-  size                  = "Standard_B2s"
+  patch_mode          = "ImageDefault"
+  priority            = "Regular"
+  provision_vm_agent  = "true"
+  resource_group_name = upper(var.azure.resource_group_name)
+  secure_boot_enabled = "false"
+  size                = "Standard_B2s"
 
   source_image_reference {
     offer     = "0001-com-ubuntu-server-focal"
