@@ -62,11 +62,12 @@ sudo chmod a+x /usr/local/bin/terragrunt
 # Quick Setup
 
 ```bash
-terraform init
-terraform apply -var-file=environment/cloud.tfvars
+terragrunt init
+terragrunt plan
+terragrunt apply
 
 # Join the hosts to the ZeroTier network
-for resource in $(tf output | grep "tpi" | awk '{gsub(/"/, ""); print $1","$3}'| xargs echo -n); do
+for resource in $(terragrunt output | grep "tpi" | awk '{gsub(/"/, ""); print $1","$3}'| xargs echo -n); do
   # Set your SSH Username below
   SSH_USER="danmanners"
 
@@ -82,17 +83,16 @@ for resource in $(tf output | grep "tpi" | awk '{gsub(/"/, ""); print $1","$3}'|
 
   # Install Zerotier and join the network
   ssh $SSH_USER@$CLOUD_IP -t "curl -s https://install.zerotier.com | sudo bash && \
-  sudo zerotier-cli join $ZT_NETID"
+  sudo zerotier-cli join $ZT_NETID && \
+  echo '{\"settings\":{\"interfacePrefixBlacklist\":[\"flannel\",\"cni\"]}}' | sudo tee /var/lib/zerotier-one/local.conf && \
+  sudo chown zerotier-one:zerotier-one /var/lib/zerotier-one/local.conf && \
+  sudo systemctl restart zerotier-one"
 
   # Disable the snapd service; this can take up a **TON** of system resources on smaller VMs.
-  ssh $SSH_USER@$CLOUD_IP -t "sudo systemctl stop snapd && \
-  sudo systemctl disable snapd"
-
-  # Add DNS to the ZeroTier hosts on their ZT interfaces
-  ssh $SSH_USER@$CLOUD_IP -t 'sudo systemd-resolve -i $(ip l show | grep zt | awk '\''{gsub(/:/,""); print $2}'\'') --set-dns=10.45.0.1'
+  ssh $SSH_USER@$CLOUD_IP -t "sudo systemctl stop snapd && sudo systemctl disable snapd"
 
   # Install K3s
-  ssh $SSH_USER@$CLOUD_IP -t "sudo wget https://github.com/k3s-io/k3s/releases/download/v1.21.0%2Bk3s1/k3s \
+  ssh $SSH_USER@$CLOUD_IP -t "sudo wget https://github.com/k3s-io/k3s/releases/download/v1.21.8%2Bk3s1/k3s \
     -O /usr/local/bin/k3s && \
     sudo chmod a+x /usr/local/bin/k3s"
 
@@ -105,16 +105,26 @@ for resource in $(tf output | grep "tpi" | awk '{gsub(/"/, ""); print $1","$3}'|
 done
 ```
 
-Then, manually SSH to each host and create the `/etc/rancher/k3s/config.yaml` file. Get the Zerotier interface with:
+Then, SSH to each host and create the `/etc/rancher/k3s/config.yaml` file. You can set the Zerotier interface and Public IP with these commands:
 
 ```bash
-ip l show | grep zt | awk '{gsub(/:/,""); print "flannel-iface: "$2}'
+# Set the ZeroTier network interface:
+echo "flannel-iface: $(ip l show | grep zt | awk '{gsub(/:/,""); print $2}')" | sudo tee -a /etc/rancher/k3s/config.yaml
+
+# Get and set the external IP for the node:
+if [ $(curl -sI https://icanhazip.com -o /dev/null -w '%{http_code}\n') == '200' ]; then
+  echo "node-external-ip: $(curl -s https://icanhazip.com)" | sudo tee -a /etc/rancher/k3s/config.yaml;
+else
+  echo 'icanhazip.com did not return OK. Check network settings.';
+fi
 ```
 
-Finally, we can start everything up:
+> **MAKE SURE** you copy over and replace the `token` from one of the control plane nodes, otherwise starting your nodes will fail!
+
+Finally, we should be able to start everything up:
 
 ```bash
-for resource in $(tf output | grep "tpi" | awk '{gsub(/"/, ""); print $1","$3}'| xargs echo -n); do
+for resource in $(terragrunt output | grep "tpi" | awk '{gsub(/"/, ""); print $1","$3}'| xargs echo -n); do
   # Set your SSH Username below
   SSH_USER="danmanners"
 
@@ -127,15 +137,34 @@ for resource in $(tf output | grep "tpi" | awk '{gsub(/"/, ""); print $1","$3}'|
 done
 ```
 
-After about 60 seconds, you should see your new hosts from `kubectl get nodes`:
+After about 60 seconds, you should see your new hosts from `kubectl get nodes -owide`:
 
 ```bash
-k get nodes
-NAME                STATUS   ROLES                  AGE     VERSION
+kubectl get nodes -owide
+NAME                STATUS   ROLES      AGE     VERSION        INTERNAL-IP      EXTERNAL-IP    OS-IMAGE               KERNEL-VERSION      CONTAINER-RUNTIME
 ...
-tpi-k3s-do-edge-1   Ready    <none>                 10m     v1.21.0+k3s1
-tpi-k3s-do-edge-2   Ready    <none>                 3m49s   v1.21.0+k3s1
+tpi-k3s-azure-edge  Ready    <none>     3m15s   v1.21.8+k3s1   172.22.119.51    40.76.165.69   Ubuntu 20.04.3 LTS     5.11.0-1020-azure   containerd://1.4.12-k3s1
+tpi-k3s-aws-edge    Ready    <none>     10m7s   v1.21.8+k3s1   172.22.102.177   54.158.27.71   Ubuntu 20.04.3 LTS     5.11.0-1020-aws     containerd://1.4.12-k3s1
 ...
 ```
 
 Once Traefik is up and going, get the HTTP/HTTPS ports, install NGINX, copy over the config with the appropriate variables, and run `sudo systemctl enable --now nginx`. This will ensure that the hosts are actually listening on ports 80 and 443 as regular web traffic expects.
+
+```bash
+for resource in $(terragrunt output | grep "tpi" | awk '{gsub(/"/, ""); print $1","$3}'| xargs echo -n); do
+  # Set your SSH Username below
+  SSH_USER="danmanners"
+
+  # Break apart the variables from their comma-separated values
+  CLOUD_HOST="$(echo "$resource" | awk -F, '{print $1}')"
+  CLOUD_IP="$(echo "$resource" | awk -F, '{print $2}')"
+
+  # Copy Over the NGINX Config File
+  scp files/nginx.conf $SSH_USER@$CLOUD_IP:/tmp/nginx.conf
+  # Make a backup of the original nginx.conf file, Move it over, change permissions, and make it active
+  ssh $SSH_USER@$CLOUD_IP -t "sudo mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.old && \
+  sudo mv /tmp/nginx.conf /etc/nginx/nginx.conf && \
+  sudo chmod 0644 /etc/nginx/nginx.conf && \
+  sudo systemctl restart nginx"
+done
+```

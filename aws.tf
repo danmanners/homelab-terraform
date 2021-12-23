@@ -4,7 +4,7 @@
 // Create the cloud network stack
 module "aws_vpc" {
   // Module Source
-  source      = "git::https://github.com/danmanners/GCP-Learning.git//Single-Node-Multi-Provider/modules/aws/vpc"
+  source      = "./modules/aws/vpc"
 
   // Networking Settings
   cidr_block  = var.aws.vpc.cidr_block
@@ -18,11 +18,12 @@ module "aws_vpc" {
 // Create the AWS EC2 Instances
 module "aws_compute" {
   // Module Source
-  source      = "git::https://github.com/danmanners/GCP-Learning.git//Single-Node-Multi-Provider/modules/aws/ec2"
+  source      = "./modules/aws/compute"
   // Compute Settings
   compute_nodes   = var.aws.compute
   public_subnets  = module.aws_vpc.public_subnets
   ssh_auth        = var.ssh_auth
+  datestamp       = var.aws.datestamp
   tags            = var.aws.tags
 
   // Depends On the AWS VPC being ready
@@ -37,7 +38,7 @@ module "aws_compute" {
 
 module "aws_k3s_security_groups" {
   // Module Source
-  source      = "git::https://github.com/danmanners/GCP-Learning.git//Single-Node-Multi-Provider/modules/aws/security_group"
+  source      = "./modules/aws/security_groups"
   vpc_id = module.aws_vpc.vpc_id
   security_groups = var.aws.security_groups
   tags = var.aws.tags
@@ -45,7 +46,7 @@ module "aws_k3s_security_groups" {
 
 module "aws_k3s_security_group_association" {
   // Module Source
-  source      = "git::https://github.com/danmanners/GCP-Learning.git//Single-Node-Multi-Provider/modules/aws/ec2_sg_associate"
+  source      = "./modules/aws/security_group_association"
 
   // Load in Security Groups and ENIs
   security_groups = module.aws_k3s_security_groups.security_group_ids

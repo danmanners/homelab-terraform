@@ -69,6 +69,7 @@ aws = {
       "root_volume_size"  = "24"
     }
   ]
+  datestamp = "20210720"
   security_groups = {
     "k3s_ingress" = {
       "name" = "k3s_inbound_traffic"

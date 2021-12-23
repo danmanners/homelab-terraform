@@ -8,5 +8,7 @@ output "aws_cloud_ips" {
 }
 
 output "azure_cloud_ips" {
-  value = azurerm_public_ip.k3s_vm.ip_address
+  value = {
+    "tpi-k3s-azure-edge" = azurerm_public_ip.k3s_vm.ip_address
+  }
 }
