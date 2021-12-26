@@ -17,3 +17,9 @@ variable "all_route53_records" {
   type        = list(string)
   default     = ["www", "."]
 }
+
+variable "bucket_versioning" {
+  description = "Enables or disables file versioning in the bucket."
+  type        = bool
+  default     = false
+}

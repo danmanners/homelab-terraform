@@ -5,9 +5,29 @@ resource "aws_s3_bucket" "bucket_name" {
   // This **must** be public-read so that files can be served correctly.
   acl = "public-read"
 
+  versioning {
+    enabled = var.bucket_versioning
+  }
+
   website {
     index_document = "index.html"
   }
+
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        kms_master_key_id = aws_kms_key.s3_bucket.arn
+        sse_algorithm     = "aws:kms"
+      }
+    }
+  }
+}
+
+// AWS S3 KMS Key
+resource "aws_kms_key" "s3_bucket" {
+  description             = "${var.domain_name} KMS Key"
+  deletion_window_in_days = 10
+  enable_key_rotation     = true
 }
 
 // Get the Zone information for the given domain
@@ -16,12 +36,14 @@ data "aws_route53_zone" "domain" {
   private_zone = false
 }
 
+// Generate the Certificate
 resource "aws_acm_certificate" "cert" {
   domain_name               = var.domain_name
   subject_alternative_names = var.subject_alt_names
   validation_method         = "DNS"
 }
 
+// Create the Route53 A Records
 resource "aws_route53_record" "records" {
   for_each        = toset(var.all_route53_records)
   allow_overwrite = true
@@ -36,6 +58,7 @@ resource "aws_route53_record" "records" {
   }
 }
 
+// Create the Certificate Validation
 resource "aws_route53_record" "cert_validation" {
   for_each = {
     for domain_validation in aws_acm_certificate.cert.domain_validation_options : domain_validation.domain_name => {
@@ -54,6 +77,7 @@ resource "aws_route53_record" "cert_validation" {
   zone_id         = each.value.zone_id
 }
 
+// Create the Certificate Validation Records
 resource "aws_acm_certificate_validation" "cert_validation" {
   certificate_arn = aws_acm_certificate.cert.arn
   validation_record_fqdns = [
@@ -61,6 +85,7 @@ resource "aws_acm_certificate_validation" "cert_validation" {
   ]
 }
 
+// Create the CloudFront Distribution for the S3 bucket
 resource "aws_cloudfront_distribution" "server" {
   origin {
     domain_name = aws_s3_bucket.bucket_name.website_endpoint
@@ -117,7 +142,8 @@ resource "aws_cloudfront_distribution" "server" {
   price_class = "PriceClass_100"
 
   viewer_certificate {
-    ssl_support_method  = "sni-only"
-    acm_certificate_arn = aws_acm_certificate.cert.arn
+    ssl_support_method       = "sni-only"
+    acm_certificate_arn      = aws_acm_certificate.cert.arn
+    minimum_protocol_version = "TLSv1.2_2021"
   }
 }

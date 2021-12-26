@@ -22,28 +22,14 @@ module "aws_static_website_danmanners" {
   domain_name         = "danmanners.com"
   subject_alt_names   = ["www.danmanners.com"]
   all_route53_records = ["www", "."]
+  bucket_versioning   = true
 }
 ```
 
-The reason that `root_domain` and `domain_name` are the same here are for the simple reason that they _could_ be different, and by setting the same value twice allows for future flexibility.
+## What does this module do/not do?
 
-Consider this example:
-
-```r
-module "aws_static_website" {
-  source = "./modules/aws/static_s3_website"
-
-  ## Load in Variables
-  root_domain         = "example.com"
-  domain_name         = "main.example.com"
-  subject_alt_names   = [
-    "prod.example.com",
-    "dev.example.com"
-  ]
-  all_route53_records = [
-    "main",
-    "prod",
-    "dev"
-  ]
-}
-```
+- This module **DOES** ensure S3 bucket contents are **PUBLIC** and **NOT PRIVATE**! This is to serve content correctly.
+- This module **DOES NOT** set up access logging.
+- This module **DOES NOT** create and/or associate a WAF
+- This module **DOES NOT** handle versioning, by default.
+  - It **can** be enabled by setting `bucket_versioning = true`
