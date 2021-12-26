@@ -69,3 +69,27 @@ resource "aws_kms_key" "sops" {
     var.aws.tags
   )
 }
+
+#########################################################################
+### Static Hosted Website - danmanners.com
+module "aws_static_website_danmanners" {
+  ## Module Source
+  source = "./modules/aws/static_s3_website"
+
+  ## Load in Variables
+  root_domain         = "danmanners.com"
+  domain_name         = "danmanners.com"
+  subject_alt_names   = ["www.danmanners.com"]
+  all_route53_records = ["www", "."]
+}
+
+### Static Hosted Website - resume.danmanners.com
+module "aws_static_website_resume_danmanners" {
+  ## Module Source
+  source = "./modules/aws/static_s3_website"
+
+  ## Load in Variables
+  root_domain         = "danmanners.com"
+  domain_name         = "resume.danmanners.com"
+  all_route53_records = ["resume"]
+}
