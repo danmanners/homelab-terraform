@@ -75,25 +75,9 @@ resource "aws_kms_key" "sops" {
 resource "aws_s3_bucket" "danmanners_dot_com" {
   bucket = "danmanners.com"
   acl    = "public-read"
-  policy = data.aws_iam_policy_document.cloudfront_access.json
 
   website {
     index_document = "index.html"
-    # redirect_all_requests_to = "https://danmanners.com"
-  }
-}
-
-data "aws_iam_policy_document" "cloudfront_access" {
-  statement {
-    sid     = "1"
-    actions = ["s3:GetObject"]
-    principals {
-      type        = "AWS"
-      identifiers = [aws_cloudfront_origin_access_identity.danmanners.iam_arn]
-    }
-    resources = [
-      "arn:aws:s3:::danmanners.com/*",
-    ]
   }
 }
 
@@ -160,10 +144,6 @@ resource "aws_acm_certificate_validation" "danmanners_dot_com" {
   validation_record_fqdns = [
     for record in aws_route53_record.danmanners_dot_com_validation : record.fqdn
   ]
-}
-
-resource "aws_cloudfront_origin_access_identity" "danmanners" {
-  comment = "OAI-danmanners.com"
 }
 
 resource "aws_cloudfront_distribution" "danmanners" {
