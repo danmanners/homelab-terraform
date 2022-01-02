@@ -13,22 +13,22 @@ resource "aws_s3_bucket" "bucket_name" {
     index_document = "index.html"
   }
 
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        kms_master_key_id = aws_kms_key.s3_bucket.arn
-        sse_algorithm     = "aws:kms"
-      }
-    }
-  }
+  # server_side_encryption_configuration {
+  #   rule {
+  #     apply_server_side_encryption_by_default {
+  #       kms_master_key_id = aws_kms_key.s3_bucket.arn
+  #       sse_algorithm     = "aws:kms"
+  #     }
+  #   }
+  # }
 }
 
 // AWS S3 KMS Key
-resource "aws_kms_key" "s3_bucket" {
-  description             = "${var.domain_name} KMS Key"
-  deletion_window_in_days = 10
-  enable_key_rotation     = true
-}
+# resource "aws_kms_key" "s3_bucket" {
+#   description             = "${var.domain_name} KMS Key"
+#   deletion_window_in_days = 10
+#   enable_key_rotation     = true
+# }
 
 // Get the Zone information for the given domain
 data "aws_route53_zone" "domain" {
