@@ -13,14 +13,33 @@ module "aws_vpc" {
 
 #########################################################################
 ### Virtual Machines
-// Create the AWS EC2 Instances
-module "aws_compute" {
+// Create the amd64 Architecture AWS EC2 Instances
+module "aws_compute_amd64" {
   // Module Source
   source = "./modules/aws/compute"
   // Compute Settings
-  compute_nodes  = var.aws.compute
+  compute_nodes  = var.aws.amd64_compute
   public_subnets = module.aws_vpc.public_subnets
   ssh_auth       = var.ssh_auth
+  architecture   = "amd64"
+  datestamp      = var.aws.datestamp
+  tags           = var.aws.tags
+
+  // Depends On the AWS VPC being ready
+  depends_on = [
+    module.aws_vpc
+  ]
+}
+
+// Create the arm64 Architecture AWS EC2 Instances
+module "aws_compute_graviton" {
+  // Module Source
+  source = "./modules/aws/compute"
+  // Compute Settings
+  compute_nodes  = var.aws.arm64_compute
+  public_subnets = module.aws_vpc.public_subnets
+  ssh_auth       = var.ssh_auth
+  architecture   = "arm64"
   datestamp      = var.aws.datestamp
   tags           = var.aws.tags
 
@@ -39,6 +58,7 @@ module "aws_k3s_security_groups" {
   security_groups = var.aws.security_groups
   tags            = var.aws.tags
 }
+
 ### Security Group Association
 module "aws_k3s_security_group_association" {
   // Module Source
@@ -46,10 +66,13 @@ module "aws_k3s_security_group_association" {
 
   // Load in Security Groups and ENIs
   security_groups = module.aws_k3s_security_groups.security_group_ids
-  ec2_enis        = module.aws_compute.primary_net_interface_id
+  ec2_enis        = merge(
+    module.aws_compute_amd64.primary_net_interface_ids,
+    module.aws_compute_graviton.primary_net_interface_ids
+  )
 
   depends_on = [
-    module.aws_compute,
+    module.aws_compute_amd64,
     module.aws_k3s_security_groups
   ]
 }

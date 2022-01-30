@@ -1,6 +1,6 @@
 resource "aws_subnet" "public" {
   // Loop through 
-  for_each = { for subnet in var.subnets.public : subnet.name => subnet}
+  for_each = { for subnet in var.subnets.public : subnet.name => subnet }
 
   // Public CIDR Setup
   vpc_id                  = aws_vpc.primary.id

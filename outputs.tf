@@ -4,7 +4,10 @@
 # }
 
 output "aws_cloud_ips" {
-  value = module.aws_compute.ipv4
+  value = merge(
+    module.aws_compute_amd64.ipv4,
+    module.aws_compute_graviton.ipv4
+  )
 }
 
 output "azure_cloud_ips" {

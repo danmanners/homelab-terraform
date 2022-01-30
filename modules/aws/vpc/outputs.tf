@@ -4,6 +4,6 @@ output "vpc_id" {
 
 output "public_subnets" {
   value = {
-    for k, v in aws_subnet.public: k => v.id
+    for k, v in aws_subnet.public : k => v.id
   }
 }

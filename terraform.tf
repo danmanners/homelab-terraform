@@ -9,7 +9,7 @@ terraform {
 
   # Google Cloud Bucket Storage for State File
   backend "gcs" {
-    bucket  = "dm-homelab-tfstate"
-    prefix  = "do/state"
+    bucket = "dm-homelab-tfstate"
+    prefix = "do/state"
   }
 }

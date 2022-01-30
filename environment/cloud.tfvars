@@ -5,9 +5,9 @@ cloud_auth = {
 }
 
 ssh_auth = {
-  username = "danmanners"
-  pubkey   = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAngYLcPg5iIOgxoVae6JUr3gyqB4QBufth6oNc+II0D Dan Manners <daniel.a.manners@gmail.com>"
-  ssh_rsa  = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCqOmALCT7gw6C0xhW8ig/WqiTCfUckw7tCnFxLl+Uf0jz2MsDz6/QAQ6MWCcl486vtt2lwF5m4GDlWY2u37f259JlWKHtIyaMAAUoGsHdE1SxVZrD9D00j73WPoHoTfV6v4cTNKDr6nmcxlO5wmA4ph6zUoOZyyuhW/MtDgdT+36d8AVjWSCuWA1NiD+o2FekUBbVWvIQ52Q+GM1w67CrqIk3DGl/CVuu/VSAZnQQ971zI8IiQD+Hxj2Et6aOhGhWRBGL45YGUya9c7ZkRn4173YjJC/TQJjORMkzd3o47EcDWK9i8rNm1YfL/EkAa+5N7sV+nMHonNZfBsSfV8l69EVMRTASvp22AArIxpDyMpgHk14IjjrZ2mBi1fATVGqZEYQYv2qMqGx32qPrvGLFwZ6jzumzPvpQIlJEoKE5gF+4KIXGs0OPW0FhWtn22R2hNg+PfD0i86p7iDSE0Fa7bdksvN1Ah9X4gqb0A8EXgvzQ4N/1bfbd2zi9yBKflCi+tW5/6zghO7oFM0aKHR7G6BDPYu8j/dSfprPejOLVSaO3folxerXMvTWc7PXptwNoA54oAze1zNuF3Nu/oeBps2EOXXugCiw/XgKsdWQ5M70EGWEY+NB1IpePX+AwbW+OIx2QC3vi/Pt3tknkmiubFRs9OignhX/V+xyYJQCEOrw== dan@RyzenPC"
+  username       = "danmanners"
+  ed25519_pubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAngYLcPg5iIOgxoVae6JUr3gyqB4QBufth6oNc+II0D Dan Manners <daniel.a.manners@gmail.com>"
+  rsa_pubkey     = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCqOmALCT7gw6C0xhW8ig/WqiTCfUckw7tCnFxLl+Uf0jz2MsDz6/QAQ6MWCcl486vtt2lwF5m4GDlWY2u37f259JlWKHtIyaMAAUoGsHdE1SxVZrD9D00j73WPoHoTfV6v4cTNKDr6nmcxlO5wmA4ph6zUoOZyyuhW/MtDgdT+36d8AVjWSCuWA1NiD+o2FekUBbVWvIQ52Q+GM1w67CrqIk3DGl/CVuu/VSAZnQQ971zI8IiQD+Hxj2Et6aOhGhWRBGL45YGUya9c7ZkRn4173YjJC/TQJjORMkzd3o47EcDWK9i8rNm1YfL/EkAa+5N7sV+nMHonNZfBsSfV8l69EVMRTASvp22AArIxpDyMpgHk14IjjrZ2mBi1fATVGqZEYQYv2qMqGx32qPrvGLFwZ6jzumzPvpQIlJEoKE5gF+4KIXGs0OPW0FhWtn22R2hNg+PfD0i86p7iDSE0Fa7bdksvN1Ah9X4gqb0A8EXgvzQ4N/1bfbd2zi9yBKflCi+tW5/6zghO7oFM0aKHR7G6BDPYu8j/dSfprPejOLVSaO3folxerXMvTWc7PXptwNoA54oAze1zNuF3Nu/oeBps2EOXXugCiw/XgKsdWQ5M70EGWEY+NB1IpePX+AwbW+OIx2QC3vi/Pt3tknkmiubFRs9OignhX/V+xyYJQCEOrw== dan@RyzenPC"
 }
 
 # google_cloud = {
@@ -61,12 +61,20 @@ aws = {
       }
     }
   }
-  compute = [
+  amd64_compute = [
     {
       "name"             = "tpi-k3s-aws-edge"
       "instance_size"    = "t3.medium"
       "subnet_id"        = "1a"
       "root_volume_size" = "24"
+    }
+  ]
+  arm64_compute = [
+    {
+      "name"             = "tpi-k3s-aws-graviton"
+      "instance_size"    = "t4g.small"
+      "subnet_id"        = "1a"
+      "root_volume_size" = "20"
     }
   ]
   datestamp = "20210720"

@@ -181,7 +181,7 @@ resource "azurerm_managed_disk" "tpi-k3s-azure-edge_disk1_70a4f4157fd847dc91d8c5
 resource "azurerm_linux_virtual_machine" "tpi_k3s_azure_edge" {
   admin_ssh_key {
     username   = "danmanners"
-    public_key = var.ssh_auth.ssh_rsa
+    public_key = var.ssh_auth.rsa_pubkey
   }
 
   admin_username                  = "danmanners"
