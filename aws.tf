@@ -32,22 +32,22 @@ module "aws_compute_amd64" {
 }
 
 // Create the arm64 Architecture AWS EC2 Instances
-module "aws_compute_graviton" {
-  // Module Source
-  source = "./modules/aws/compute"
-  // Compute Settings
-  compute_nodes  = var.aws.arm64_compute
-  public_subnets = module.aws_vpc.public_subnets
-  ssh_auth       = var.ssh_auth
-  architecture   = "arm64"
-  datestamp      = var.aws.datestamp
-  tags           = var.aws.tags
+# module "aws_compute_graviton" {
+#   // Module Source
+#   source = "./modules/aws/compute"
+#   // Compute Settings
+#   compute_nodes  = var.aws.arm64_compute
+#   public_subnets = module.aws_vpc.public_subnets
+#   ssh_auth       = var.ssh_auth
+#   architecture   = "arm64"
+#   datestamp      = var.aws.datestamp
+#   tags           = var.aws.tags
 
-  // Depends On the AWS VPC being ready
-  depends_on = [
-    module.aws_vpc
-  ]
-}
+#   // Depends On the AWS VPC being ready
+#   depends_on = [
+#     module.aws_vpc
+#   ]
+# }
 
 #########################################################################
 ### Security Groups
@@ -68,7 +68,7 @@ module "aws_k3s_security_group_association" {
   security_groups = module.aws_k3s_security_groups.security_group_ids
   ec2_enis        = merge(
     module.aws_compute_amd64.primary_net_interface_ids,
-    module.aws_compute_graviton.primary_net_interface_ids
+    # module.aws_compute_graviton.primary_net_interface_ids
   )
 
   depends_on = [

@@ -6,7 +6,7 @@
 output "aws_cloud_ips" {
   value = merge(
     module.aws_compute_amd64.ipv4,
-    module.aws_compute_graviton.ipv4
+    # module.aws_compute_graviton.ipv4
   )
 }
 

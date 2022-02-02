@@ -66,12 +66,12 @@ aws = {
       "name"             = "tpi-k3s-aws-edge"
       "instance_size"    = "t3.medium"
       "subnet_id"        = "1a"
-      "root_volume_size" = "24"
+      "root_volume_size" = "32"
     }
   ]
   arm64_compute = [
     {
-      "name"             = "tpi-k3s-aws-graviton"
+      "name"             = "aws-graviton"
       "instance_size"    = "t4g.small"
       "subnet_id"        = "1a"
       "root_volume_size" = "20"
