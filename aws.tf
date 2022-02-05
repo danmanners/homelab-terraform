@@ -66,7 +66,7 @@ module "aws_k3s_security_group_association" {
 
   // Load in Security Groups and ENIs
   security_groups = module.aws_k3s_security_groups.security_group_ids
-  ec2_enis        = merge(
+  ec2_enis = merge(
     module.aws_compute_amd64.primary_net_interface_ids,
     # module.aws_compute_graviton.primary_net_interface_ids
   )
