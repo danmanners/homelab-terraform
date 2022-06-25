@@ -3,6 +3,12 @@ variable "compute_nodes" {
   type        = list(any)
 }
 
+variable "ami" {
+  description = "AMI that the node should be initialized with."
+  type        = string
+  default     = null
+}
+
 variable "public_subnets" {
   description = "Map object containing key=values of the public."
   type        = map(any)

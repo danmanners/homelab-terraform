@@ -10,6 +10,12 @@ output "aws_cloud_ips" {
   )
 }
 
+output "talos_cloud_ips" {
+  value = merge(
+    module.aws_wireguard_arm64.ipv4
+  )
+}
+
 output "azure_cloud_ips" {
   value = {
     var.azure.compute.*.name[0] = azurerm_public_ip.k3s_vm.ip_address

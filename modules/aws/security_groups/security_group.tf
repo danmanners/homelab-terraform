@@ -8,8 +8,8 @@ resource "aws_security_group" "sg" {
     for_each = each.value.ingress
     content {
       description = ingress.value.description
-      from_port   = ingress.value.port
-      to_port     = ingress.value.port
+      from_port   = ingress.value.port != null ? ingress.value.port : ingress.value.to_port
+      to_port     = ingress.value.port != null ? ingress.value.port : ingress.value.from_port
       protocol    = ingress.value.protocol
       cidr_blocks = [ingress.value.cidr_blocks]
     }

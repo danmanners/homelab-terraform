@@ -1,9 +1,11 @@
 // Launches a set number of Ubuntu EC2 instances
 resource "aws_instance" "nodes" {
   // Loop through each of the EC2 nodes
-  for_each = { for node in var.compute_nodes : node.name => node }
+  for_each = {
+    for node in var.compute_nodes : node.name => node
+  }
 
-  ami           = data.aws_ami.ubuntu.id
+  ami           = var.ami == null ? data.aws_ami.ubuntu.id : var.ami
   instance_type = each.value.instance_size
   subnet_id     = lookup(var.public_subnets, each.value.subnet_id)
 

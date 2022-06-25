@@ -119,11 +119,14 @@ resource "azurerm_public_ip" "k3s_vm" {
   location                = var.azure.location
   name                    = "${var.azure.compute.*.name[0]}-public-ip"
   allocation_method       = "Static"
-  availability_zone       = "Zone-Redundant"
+  ip_tags                 = {}
+  zones                   = ["1", "2", "3"]
   idle_timeout_in_minutes = "4"
   ip_version              = "IPv4"
   sku                     = "Standard"
   sku_tier                = "Regional"
+
+  timeouts {}
 
   tags = {
     Name    = "${var.azure.resource_group_name}-public-ip"

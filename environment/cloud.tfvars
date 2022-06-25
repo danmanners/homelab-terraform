@@ -71,14 +71,14 @@ aws = {
   ]
   arm64_compute = [
     {
-      "name"             = "aws-graviton"
+      "name"             = "talos-grav1"
       "instance_size"    = "t4g.small"
       "subnet_id"        = "1a"
-      "root_volume_size" = "20"
+      "root_volume_size" = "32"
     }
   ]
   datestamp = "20210720"
-  security_groups = {
+  k3s_security_groups = {
     "k3s_ingress" = {
       "name"        = "k3s_inbound_traffic"
       "description" = "Allows inbound traffic to the appropriate ports."
@@ -116,6 +116,46 @@ aws = {
         {
           "description" = "HTTPS Alt Inbound"
           "port"        = 8443
+          "protocol"    = "tcp"
+          "cidr_blocks" = "0.0.0.0/0"
+        }
+      ]
+    }
+  }
+  talos_security_groups = {
+    "k3s_ingress" = {
+      "name"        = "talos_inbound_traffic"
+      "description" = "Allows inbound traffic to the appropriate ports."
+      "ingress" = [
+        {
+          "description" = "ICMP Inbound"
+          "port"        = -1
+          "protocol"    = "icmp"
+          "cidr_blocks" = "0.0.0.0/0"
+        },
+        {
+          "description" = "HTTP Inbound"
+          "port"        = 80
+          "protocol"    = "tcp"
+          "cidr_blocks" = "0.0.0.0/0"
+        },
+        {
+          "description" = "HTTPS Inbound"
+          "port"        = 443
+          "protocol"    = "tcp"
+          "cidr_blocks" = "0.0.0.0/0"
+        },
+        {
+          "description" = "Talos 6443 Ingress"
+          "port"        = 6443
+          "protocol"    = "tcp"
+          "cidr_blocks" = "0.0.0.0/0"
+        },
+        {
+          "description" = "Talos 50000-50001 Ingress"
+          "port"        = null
+          "to_port"     = 50000
+          "from_port"   = 50001
           "protocol"    = "tcp"
           "cidr_blocks" = "0.0.0.0/0"
         }
