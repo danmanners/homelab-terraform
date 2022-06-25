@@ -36,13 +36,13 @@ module "aws_wireguard_arm64" {
   // Module Source
   source = "./modules/aws/compute"
   // Compute Settings
-  compute_nodes  = var.aws.arm64_compute
-  public_subnets = module.aws_vpc.public_subnets
-  ssh_auth       = var.ssh_auth
-  architecture   = "arm64"
-  ami            = "ami-01b74c1b9e3142abd"
-  datestamp      = var.aws.datestamp
-  tags           = var.aws.tags
+  compute_nodes    = var.aws.arm64_compute
+  public_subnets   = module.aws_vpc.public_subnets
+  architecture     = "arm64"
+  ami              = "ami-01b74c1b9e3142abd"
+  empty_cloud_init = true
+  datestamp        = var.aws.datestamp
+  tags             = var.aws.tags
 
   // Depends On the AWS VPC being ready
   depends_on = [

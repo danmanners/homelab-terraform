@@ -10,7 +10,11 @@ resource "aws_instance" "nodes" {
   subnet_id     = lookup(var.public_subnets, each.value.subnet_id)
 
   // Set up Cloud-Init User Data
-  user_data = templatefile("${path.module}/user_data.tpl", { ssh_users = local.ssh_users })
+  user_data = var.empty_cloud_init == false ? templatefile(
+    "${path.module}/user_data.tpl", {
+      ssh_users = local.ssh_users
+    }
+  ) : null
 
   root_block_device {
     volume_size = each.value.root_volume_size

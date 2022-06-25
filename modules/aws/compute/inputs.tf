@@ -27,6 +27,13 @@ variable "datestamp" {
 variable "ssh_auth" {
   description = "Map of key=values with the SSH Username, RSA Pubkey, and ED25519 Pubkey."
   type        = map(any)
+  default     = null
+}
+
+variable "empty_cloud_init" {
+  description = "Disables the 'cloud_init' template; required for AMIs like Talos."
+  type        = bool
+  default     = false
 }
 
 variable "tags" {
