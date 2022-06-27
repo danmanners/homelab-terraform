@@ -5,9 +5,10 @@ resource "aws_instance" "nodes" {
     for node in var.compute_nodes : node.name => node
   }
 
-  ami           = var.ami == null ? data.aws_ami.ubuntu.id : var.ami
-  instance_type = each.value.instance_size
-  subnet_id     = lookup(var.public_subnets, each.value.subnet_id)
+  ami               = var.ami == null ? data.aws_ami.ubuntu.id : var.ami
+  instance_type     = each.value.instance_size
+  subnet_id         = lookup(var.public_subnets, each.value.subnet_id)
+  source_dest_check = false
 
   // Set up Cloud-Init User Data
   user_data = var.empty_cloud_init == false ? templatefile(

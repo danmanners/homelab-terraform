@@ -2,6 +2,8 @@
 
 This repo contains all of the necessary information to get multi cloud K3s up and going for my [Homelab-K3s-Cluster](https://github.com/danmanners/homelab-k3s-cluster).
 
+> **NOTE**: Lots of things below are no longer relevant, and a major overhaul of this file is coming soon 🙂
+
 ## Setup (Fedora/RHEL/CentOS)
 
 You'll need several tools and utilities to get everything up and going. This list _may not_ be exhaustive.

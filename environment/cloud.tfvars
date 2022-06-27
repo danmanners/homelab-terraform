@@ -152,6 +152,12 @@ aws = {
           "cidr_blocks" = "0.0.0.0/0"
         },
         {
+          "description" = "Talos Wireguard Ingress"
+          "port"        = 13231
+          "protocol"    = "udp"
+          "cidr_blocks" = "0.0.0.0/0"
+        },
+        {
           "description" = "Talos 50000-50001 Ingress"
           "port"        = null
           "to_port"     = 50000
