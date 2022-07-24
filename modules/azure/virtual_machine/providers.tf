@@ -6,10 +6,9 @@ terraform {
       version = "3.15.0"
     }
   }
+}
 
-  # Google Cloud Bucket Storage for State File
-  backend "gcs" {
-    bucket = "dm-homelab-tfstate"
-    prefix = "do/state"
-  }
+# Configure the Microsoft Azure Provider
+provider "azurerm" {
+  features {}
 }
