@@ -10,6 +10,6 @@ variable "azure" {
   description = "All Azure specific resources values should be loaded in this top-level map."
 }
 
-variable "ssh_auth" {
-  description = ""
-}
+# variable "google" {
+#   description = "All Azure specific resources values should be loaded in this top-level map."
+# }
