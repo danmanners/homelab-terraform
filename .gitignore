@@ -6,3 +6,6 @@ generated/
 *.lock.hcl
 *.state
 state.json
+
+# Troubleshooting
+troubleshooting.tf

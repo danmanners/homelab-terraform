@@ -1,5 +1,5 @@
 output "ipv4" {
-  // For Each Droplet, output the IPv4 Address
+  // For Each EC2 Instance, output the IPv4 Address
   value = {
     for k, v in aws_instance.nodes : k => v.public_ip
   }

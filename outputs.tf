@@ -18,6 +18,7 @@
 
 output "talos_cloud_ips" {
   value = merge(
-    module.aws_wireguard_arm64.ipv4
+    module.aws_wireguard_arm64.ipv4,
+    module.azure_talos_vms.ipv4,
   )
 }

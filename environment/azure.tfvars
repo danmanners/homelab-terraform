@@ -1,4 +1,5 @@
 azure = {
+  network_name  = "talos-network"
   resource_group_name = "talos"
   location            = "eastus"
   address_space = [
@@ -34,7 +35,7 @@ azure = {
         name                       = "http_inbound"
         access                     = "Allow"
         direction                  = "Inbound"
-        priority                   = "101"
+        priority                   = "102"
         protocol                   = "Tcp"
         source_address_prefix      = "*"
         source_port_range          = "*"
@@ -45,7 +46,7 @@ azure = {
         name                       = "https_inbound"
         access                     = "Allow"
         direction                  = "Inbound"
-        priority                   = "101"
+        priority                   = "103"
         protocol                   = "Tcp"
         source_address_prefix      = "*"
         source_port_range          = "*"
@@ -56,7 +57,7 @@ azure = {
         name                       = "talos_6443_inbound"
         access                     = "Allow"
         direction                  = "Inbound"
-        priority                   = "100"
+        priority                   = "104"
         protocol                   = "Tcp"
         source_address_prefix      = "*"
         source_port_range          = "*"
@@ -67,7 +68,7 @@ azure = {
         name                       = "talos_wireguard_inbound"
         access                     = "Allow"
         direction                  = "Inbound"
-        priority                   = "100"
+        priority                   = "105"
         protocol                   = "Udp"
         source_address_prefix      = "*"
         source_port_range          = "*"
@@ -78,7 +79,7 @@ azure = {
         name                       = "talos_mgmt_inbound"
         access                     = "Allow"
         direction                  = "Inbound"
-        priority                   = "100"
+        priority                   = "106"
         protocol                   = "Tcp"
         source_address_prefix      = "*"
         source_port_range          = "*"
@@ -89,7 +90,7 @@ azure = {
         name                       = "permit_egress"
         access                     = "Allow"
         direction                  = "Outbound"
-        priority                   = "100"
+        priority                   = "107"
         protocol                   = "*"
         source_address_prefix      = "*"
         source_port_range          = "*"
@@ -99,9 +100,14 @@ azure = {
     ]
   }
 
+  talos_version = "v1.1.1"
   compute = [
     {
-      name = "talos-azure-vm01"
+      name          = "talos-azure-vm01"
+      instance_size = "Standard_B2s"
+      disk_size_gb  = "16"
+      subnet_id     = "public1"
+      public_ip     = true
     }
   ]
 }
