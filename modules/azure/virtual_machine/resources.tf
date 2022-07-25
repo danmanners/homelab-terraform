@@ -34,6 +34,9 @@ resource "azurerm_linux_virtual_machine" "vm" {
   vtpm_enabled               = try(each.value.vtpm_enabled, null) != null ? each.value.vtpm_enabled : "false"
   secure_boot_enabled        = try(each.value.secure_boot_enabled, null) != null ? each.value.secure_boot_enabled : "false"
 
+  // Leave this here to enable Console access
+  boot_diagnostics {}
+
   // Create the OS Disk
   os_disk {
     name                      = "${lower(each.value.name)}-os-disk"
